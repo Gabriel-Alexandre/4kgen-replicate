@@ -1,5 +1,117 @@
-prompts = [
-    "An elegant outdoor dinner set on top of a modern skyscraper, offering a spectacular panoramic view of the illuminated city at night. A long minimalist dining table with a mirrored glass surface reflects the city lights, while dark velvet chairs add a touch of sophistication. The setting is adorned with candles in golden candelabras, small vases of white flowers, and crystal glasses that sparkle under the soft lighting. The starry sky blends with the city’s lights, creating a striking contrast between urban modernity and the vastness of the night sky. A light breeze flows between the buildings, and a delicate sheer curtain sways gently, enhancing the sense of exclusivity and elegance.",
-    "A magical banquet set along the banks of a hidden waterfall deep within a lush forest. The scene is enveloped in a gentle mist, while golden sunlight filters through the treetops, casting ethereal beams that illuminate the rustic wooden table. The crystal-clear waterfall cascades softly over moss-covered rocks, providing a relaxing natural soundtrack. The table is adorned with textured ceramic plates, vintage silverware, and emerald green cut crystal glasses. Small iron-forged lanterns and candleholders cast a warm glow, reflecting off suspended water droplets. Wildflower petals and fresh leaves decorate the space, making the experience feel like a fairytale moment within untouched nature.",
-    "An elegant floating breakfast table set in a turquoise-blue lagoon, surrounded by lush tropical greenery. The rising sun paints the sky in golden and pink hues, reflecting gently on the calm water surface. A dark wooden platform floats delicately, decorated with a luxurious breakfast spread: white porcelain cups with golden details, plates filled with fresh croissants, vibrant tropical fruits, and natural juices served in crystal goblets. Hibiscus flowers and palm leaves adorn the table, adding an exotic touch to the setting. Colorful fish swim beneath the platform, while in the background, a small waterfall gently flows into the lagoon, creating a soothing ambiance. The morning breeze and the sweet scent of nature make this a paradise-like breakfast experience.",
-]
+import requests
+import json
+from datetime import datetime
+import os
+
+def generate_completion(prompt, api_url="http://127.0.0.1:1234/v1/chat/completions"):
+    """
+    Função para gerar completions usando a API local do LM Studio
+    
+    Args:
+        prompt (str): O texto de entrada para o modelo
+        api_url (str): URL da API local (padrão para LM Studio)
+    
+    Returns:
+        str: A resposta gerada pelo modelo
+    """
+    
+    # Preparando o payload no formato esperado
+    payload = {
+        "messages": [
+            {
+                "role": "user",
+                "content": prompt
+            }
+        ],
+        "temperature": 0.7,
+        "max_tokens": 2000
+    }
+    
+    try:
+        # Fazendo a requisição POST
+        response = requests.post(
+            api_url,
+            json=payload,
+            headers={"Content-Type": "application/json"}
+        )
+        
+        # Verificando se a requisição foi bem sucedida
+        if response.status_code == 200:
+            result = response.json()
+            return result["choices"][0]["message"]["content"]
+        else:
+            return f"Erro: Status code {response.status_code}"
+            
+    except requests.exceptions.RequestException as e:
+        return f"Erro na requisição: {str(e)}"
+
+template_10_images = """
+    You are an AI artist who generates high-quality images.
+    Your task is to generate 3 images based on a theme provided by the user.
+    The images must be high quality, with sharp details and vibrant colors.
+    The images must be unique and non-repetitive.
+    The images must be generated in a visually appealing and easy to understand style.
+    The prompt must be rich in details, with lots of information, keywords, describing objects, colors, textures, etc.
+    Do not generate any text in the images, only the images themselves.
+    Do not generate any people, only landscapes and nature.
+    Realistic images, with vivid colors, 4K, ultra-realistic.
+    Prompt must be in english.
+    Prompt example: "An elegant floating breakfast table set in a turquoise-blue lagoon, surrounded by lush tropical greenery. The rising sun paints the sky in golden and pink hues, reflecting gently on the calm water surface. A dark wooden platform floats delicately, decorated with a luxurious breakfast spread: white porcelain cups with golden details, plates filled with fresh croissants, vibrant tropical fruits, and natural juices served in crystal goblets. Hibiscus flowers and palm leaves adorn the table, adding an exotic touch to the setting. Colorful fish swim beneath the platform, while in the background, a small waterfall gently flows into the lagoon, creating a soothing ambiance. The morning breeze and the sweet scent of nature make this a paradise-like breakfast experience."
+    The image theme is: [ABOUT]
+    The output must be a json in the following format (always respect the format, do not add anything beyond what is inside the curly braces \{\}):
+    {
+        "images": [
+            {
+                "image": "image1.png",
+                "prompt": "prompt1",
+            },
+            {
+                "image": "image2.png",
+                "prompt": "prompt2",
+            },
+            ...
+        ]
+    }
+"""
+
+
+# Exemplo de uso
+if __name__ == "__main__":
+    # Criando o diretório prompts se não existir
+    if not os.path.exists("./prompts"):
+        os.makedirs("./prompts")
+    
+    about = input("Escreva um tema para as imagens que serão geradas: ")
+    final_prompt = template_10_images.replace("[ABOUT]", about)
+    response = generate_completion(final_prompt)
+    
+    # Obtendo timestamp atual
+    now = datetime.now()
+    timestamp = {
+        "date": now.strftime("%Y-%m-%d"),
+        "hour": now.strftime("%H"),
+        "minute": now.strftime("%M"),
+        "second": now.strftime("%S")
+    }
+    
+    # Criando o objeto JSON final
+    try:
+        response_json = json.loads(response)  # Convertendo a string para JSON
+        final_json = {
+            "timestamp": timestamp,
+            "theme": about,
+            "response": response_json
+        }
+        
+        # Gerando nome do arquivo com timestamp
+        filename = f"./prompts/response_{now.strftime('%Y%m%d_%H%M%S')}.json"
+        
+        # Salvando o arquivo
+        with open(filename, "w", encoding="utf-8") as f:
+            json.dump(final_json, f, ensure_ascii=False, indent=4)
+            
+        print(f"Arquivo salvo com sucesso em: {filename}")
+            
+    except json.JSONDecodeError as e:
+        print(f"Erro ao converter resposta para JSON: {str(e)}")
+        print("Resposta recebida:", response)

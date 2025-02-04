@@ -2,11 +2,16 @@ import replicate
 import os
 from datetime import datetime
 from dotenv import load_dotenv
-from input import prompts
+import json
 import requests
 
 # Carregar variáveis de ambiente do arquivo .env
 load_dotenv()
+
+# Carregar prompts do arquivo JSON
+with open('prompts/response_20250204_203102.json', 'r') as f:
+    json_data = json.load(f)
+    prompts = [image['prompt'] for image in json_data['response']['images']]
 
 # Criar diretório de output se não existir
 output_dir = "./output"
