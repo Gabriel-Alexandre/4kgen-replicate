@@ -8,10 +8,18 @@ import requests
 # Carregar variáveis de ambiente do arquivo .env
 load_dotenv()
 
-# Carregar prompts do arquivo JSON
-with open('prompts/response_20250204_203102.json', 'r') as f:
-    json_data = json.load(f)
-    prompts = [image['prompt'] for image in json_data['response']['images']]
+# Processar todos os arquivos JSON na pasta prompts
+prompts_dir = 'prompts'
+all_prompts = []
+
+# Percorrer todos os arquivos na pasta prompts
+for filename in os.listdir(prompts_dir):
+    if filename.endswith('.json'):
+        file_path = os.path.join(prompts_dir, filename)
+        with open(file_path, 'r') as f:
+            json_data = json.load(f)
+            prompts = [image['prompt'] for image in json_data['response']['images']]
+            all_prompts.extend(prompts)
 
 # Criar diretório de output se não existir
 output_dir = "./output"
@@ -19,7 +27,7 @@ if not os.path.exists(output_dir):
     os.makedirs(output_dir)
 
 # Processar cada prompt sequencialmente
-for prompt in prompts:
+for prompt in all_prompts:
     # Gerar timestamp único para o nome do arquivo
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     
