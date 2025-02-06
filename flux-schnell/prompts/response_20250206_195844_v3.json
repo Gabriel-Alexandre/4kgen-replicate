@@ -1,0 +1,37 @@
+{
+    "timestamp": {
+        "date": "2025-02-06",
+        "hour": "19",
+        "minute": "58",
+        "second": "44"
+    },
+    "theme": "jardin",
+    "response": {
+        "images": [
+            {
+                "image": "jardin_elegance.png",
+                "prompt": "A serene and elegant French garden in full bloom, featuring a variety of meticulously pruned hedges forming intricate patterns. The central pathway is lined with vibrant red roses and delicate pink peonies, creating a fragrant and colorful landscape. In the background, lush greenery surrounds an ornate iron gazebo where a small fountain adds a gentle sound to the tranquil setting. Sunlight filters through the dense foliage of ancient oak trees, casting dappled shadows on the ground. The air is filled with the sweet scent of jasmine and lavender, creating a peaceful and enchanting atmosphere.",
+                "brief_description": "A beautifully maintained French garden with vibrant flowers and serene elements",
+                "tags": [
+                    "garden",
+                    "French",
+                    "flowers",
+                    "ornament",
+                    "peaceful"
+                ]
+            },
+            {
+                "image": "jardin_versailles.png",
+                "prompt": "An expansive and grandiose Versailles-style garden, where meticulously manicured lawns meet majestic fountains. The central fountain is surrounded by a ring of symmetrical flower beds in rich colors: deep reds, fiery oranges, and deep purples. Towering evergreens frame the scene, providing contrast to the vibrant hues. A winding path leads to a large marble statue of Apollo, god of music and poetry, standing amidst lush greenery. The setting is bathed in soft morning light, casting long shadows that add depth and dimension to the landscape.",
+                "brief_description": "A grand Versailles-style garden with elaborate fountains and statues",
+                "tags": [
+                    "garden",
+                    "Versailles",
+                    "fountain",
+                    "statue",
+                    "classical"
+                ]
+            }
+        ]
+    }
+}

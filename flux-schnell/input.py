@@ -45,9 +45,9 @@ def generate_completion(prompt, api_url="http://127.0.0.1:1234/v1/chat/completio
     except requests.exceptions.RequestException as e:
         return f"Erro na requisição: {str(e)}"
 
-template_10_images = """
+template_images = """
     You are an AI artist who generates high-quality images.
-    Your task is to generate 3 images based on a theme provided by the user.
+    Your task is to generate 2 images based on a theme provided by the user.
     The images must be high quality, with sharp details and vibrant colors.
     The images must be unique and non-repetitive.
     The images must be generated in a visually appealing and easy to understand style.
@@ -62,14 +62,19 @@ template_10_images = """
     {
         "images": [
             {
-                "image": "image1.png",
+                "image": "[choose a name for the image].png",
                 "prompt": "prompt1",
+                "brief_description": "brief description of the image",
+                "tags": ["tag1", "tag2", "tag3"]
             },
             {
-                "image": "image2.png",
+                "image": "[choose a name for the image].png",
                 "prompt": "prompt2",
+                "brief_description": "brief description of the image",
+                "tags": ["tag1", "tag2", "tag3"]
             },
             ...
+
         ]
     }
 """
@@ -82,36 +87,44 @@ if __name__ == "__main__":
         os.makedirs("./prompts")
     
     about = input("Escreva um tema para as imagens que serão geradas: ")
-    final_prompt = template_10_images.replace("[ABOUT]", about)
-    response = generate_completion(final_prompt)
+    number_of_images = input("Escreva o número de imagens que serão geradas: ")
+    final_prompt = template_images.replace("[ABOUT]", about)
+    number_range = int(int(number_of_images)/2)
     
-    # Obtendo timestamp atual
-    now = datetime.now()
-    timestamp = {
-        "date": now.strftime("%Y-%m-%d"),
-        "hour": now.strftime("%H"),
-        "minute": now.strftime("%M"),
-        "second": now.strftime("%S")
-    }
-    
-    # Criando o objeto JSON final
-    try:
-        response_json = json.loads(response)  # Convertendo a string para JSON
-        final_json = {
-            "timestamp": timestamp,
-            "theme": about,
-            "response": response_json
+
+    # Loop para gerar 10 arquivos diferentes
+    for i in range(number_range):
+        print(f"\nGerando arquivo {i+1} de {number_range}...")
+        response = generate_completion(final_prompt)
+        
+
+        # Obtendo timestamp atual
+        now = datetime.now()
+        timestamp = {
+            "date": now.strftime("%Y-%m-%d"),
+            "hour": now.strftime("%H"),
+            "minute": now.strftime("%M"),
+            "second": now.strftime("%S")
         }
         
-        # Gerando nome do arquivo com timestamp
-        filename = f"./prompts/response_{now.strftime('%Y%m%d_%H%M%S')}.json"
-        
-        # Salvando o arquivo
-        with open(filename, "w", encoding="utf-8") as f:
-            json.dump(final_json, f, ensure_ascii=False, indent=4)
+        # Criando o objeto JSON final
+        try:
+            response_json = json.loads(response)  # Convertendo a string para JSON
+            final_json = {
+                "timestamp": timestamp,
+                "theme": about,
+                "response": response_json
+            }
             
-        print(f"Arquivo salvo com sucesso em: {filename}")
+            # Gerando nome do arquivo com timestamp e número da iteração
+            filename = f"./prompts/response_{now.strftime('%Y%m%d_%H%M%S')}_v{i+1}.json"
             
-    except json.JSONDecodeError as e:
-        print(f"Erro ao converter resposta para JSON: {str(e)}")
-        print("Resposta recebida:", response)
+            # Salvando o arquivo
+            with open(filename, "w", encoding="utf-8") as f:
+                json.dump(final_json, f, ensure_ascii=False, indent=4)
+                
+            print(f"Arquivo salvo com sucesso em: {filename}")
+                
+        except json.JSONDecodeError as e:
+            print(f"Erro ao converter resposta para JSON: {str(e)}")
+            print("Resposta recebida:", response)

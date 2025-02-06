@@ -1,0 +1,33 @@
+{
+    "timestamp": {
+        "date": "2025-02-06",
+        "hour": "19",
+        "minute": "59",
+        "second": "02"
+    },
+    "theme": "jardin",
+    "response": {
+        "images": [
+            {
+                "image": "jardin_serenity.png",
+                "prompt": "A serene and lush garden scene in late afternoon, filled with vibrant green leaves and colorful flowers. The path winds through the garden leading to an elegant stone fountain that creates a gentle splash of water into a round marble basin. A variety of fragrant flowers such as roses, tulips, and sunflowers add splashes of red, orange, and yellow among the deep green foliage. The air is filled with the sweet scent of blossoms, and small butterflies flutter around, adding to the tranquil atmosphere. A few patches of soft grass provide a comfortable spot for visitors to sit and enjoy the peaceful surroundings.",
+                "brief_description": "A serene garden path leading to a stone fountain surrounded by vibrant flowers in late afternoon",
+                "tags": [
+                    "garden",
+                    "serenity",
+                    "flowers"
+                ]
+            },
+            {
+                "image": "jardin_exotic.png",
+                "prompt": "An exotic and colorful tropical garden, with tall palm trees and vibrant hibiscus flowers. The ground is covered with a lush carpet of green grass and tropical leaves, while colorful butterflies and birds add movement and life to the scene. A small wooden bridge spans over a bubbling stream that flows through the garden, creating a soothing sound. The setting sun casts long shadows and warm golden light across the landscape, enhancing the vibrant colors and textures. Delicate vines with purple and pink orchids wind around the trees, adding an elegant touch.",
+                "brief_description": "An exotic tropical garden with palm trees, colorful flowers, and a bubbling stream at sunset",
+                "tags": [
+                    "tropical",
+                    "garden",
+                    "exotic"
+                ]
+            }
+        ]
+    }
+}

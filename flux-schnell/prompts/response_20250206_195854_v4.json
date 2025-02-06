@@ -1,0 +1,37 @@
+{
+    "timestamp": {
+        "date": "2025-02-06",
+        "hour": "19",
+        "minute": "58",
+        "second": "54"
+    },
+    "theme": "jardin",
+    "response": {
+        "images": [
+            {
+                "image": "jardin_misty_evening.png",
+                "prompt": "A serene misty evening in a lush garden, with the soft light of the setting sun casting warm golden hues. The garden is filled with vibrant blooming flowers like lavender, tulips, and roses, their colors blending into a palette of deep pinks, purples, and oranges. Towering trees with emerald green foliage provide shade to winding stone pathways. A small babbling brook flows through the center, its clear waters sparkling in the fading light. In the background, a magnificent old oak tree stands tall, its branches heavy with leaves shimmering under the twilight. The air is filled with the sweet fragrance of night-blooming jasmine and the gentle chirping of crickets, creating an enchanting atmosphere.",
+                "brief_description": "A peaceful evening garden scene with vibrant flowers, misty atmosphere, and a tranquil brook",
+                "tags": [
+                    "jardin",
+                    "evening",
+                    "garden",
+                    "flowers",
+                    "mist"
+                ]
+            },
+            {
+                "image": "jardin_fairy_garden.png",
+                "prompt": "An enchanting fairy garden filled with whimsical details. Tiny fairy houses made of twigs and leaves are tucked among colorful flowers, surrounded by a dense carpet of moss and ferns. The air is alive with the gentle flutter of butterfly wings and the soft rustling of petals in the breeze. A small stream winds through the garden, its surface glistening like silver. A miniature wooden bridge leads to a hidden nook where fairies are dancing around a glowing crystal. In the background, a larger tree provides a backdrop for an intricate network of climbing vines and hanging ivy. The overall atmosphere is magical and fairy-tale-like.",
+                "brief_description": "A whimsical fairy garden with tiny houses, fluttering butterflies, and dancing fairies",
+                "tags": [
+                    "jardin",
+                    "fairytale",
+                    "fairy_garden",
+                    "miniature",
+                    "flowers"
+                ]
+            }
+        ]
+    }
+}

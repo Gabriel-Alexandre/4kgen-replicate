@@ -1,0 +1,37 @@
+{
+    "timestamp": {
+        "date": "2025-02-06",
+        "hour": "19",
+        "minute": "58",
+        "second": "28"
+    },
+    "theme": "jardin",
+    "response": {
+        "images": [
+            {
+                "image": "jardin_serenity.png",
+                "prompt": "A tranquil garden at sunrise, with a winding path covered in dewy grass and lined by lush green trees. The sky is painted with soft pastel colors: light pink, baby blue, and golden yellow, reflecting on the water of a small pond where lotus flowers bloom. Delicate morning fog gently rises from the surface, adding an ethereal atmosphere to the scene. A stone bench sits under an ancient oak tree, its leaves rustling in the gentle breeze. In the background, a cottage with wooden shutters and a thatched roof stands among the trees, creating a peaceful and serene setting.",
+                "brief_description": "A serene garden at sunrise with dewy grass, lotus flowers, and a stone bench under an ancient oak tree.",
+                "tags": [
+                    "garden",
+                    "sunrise",
+                    "serenity",
+                    "lotus",
+                    "dewy grass"
+                ]
+            },
+            {
+                "image": "jardin_exotica.png",
+                "prompt": "A vibrant tropical garden filled with exotic plants and colorful flowers. The scene is alive with the sound of chirping birds and buzzing bees. Giant leaves of the banana plant shade a path leading to a small waterfall, where water droplets sparkle in the sunlight. A variety of flowers bloom in rich hues: bright red roses, purple hibiscus, orange marigolds, and yellow sunflowers. The garden is further enhanced by the presence of butterflies fluttering around, adding movement and life to the composition. In the background, a series of terraces lead up to a small gazebo where lush greenery hangs from the roof, creating a hidden oasis in the midst of nature.",
+                "brief_description": "A vibrant tropical garden with exotic plants, colorful flowers, and fluttering butterflies.",
+                "tags": [
+                    "tropical",
+                    "garden",
+                    "exotic",
+                    "flowers",
+                    "butterflies"
+                ]
+            }
+        ]
+    }
+}
