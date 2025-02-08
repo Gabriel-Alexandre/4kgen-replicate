@@ -3,6 +3,7 @@ import json
 from datetime import datetime
 import os
 import uuid
+from run import process_images_by_uuid  # Adicionar esta importação no topo do arquivo
 
 def generate_completion(prompt, api_url="http://127.0.0.1:1234/v1/chat/completions"):
     """
@@ -48,7 +49,7 @@ def generate_completion(prompt, api_url="http://127.0.0.1:1234/v1/chat/completio
 
 template_images = """
     You are an AI artist who generates high-quality images.
-    Your task is to generate 2, only 2 images, based on a theme provided by the user.
+    Your task is to generate 2, based on a theme provided by the user.
     The images must be high quality, with sharp details and vibrant colors.
     The images must be unique and non-repetitive.
     The images must be generated in a visually appealing and easy to understand style.
@@ -94,6 +95,7 @@ if __name__ == "__main__":
     output_dir = os.path.join("./prompts", execution_uuid)
     os.makedirs(output_dir, exist_ok=True)
     
+    print("\n=== Gerando prompts ===")
     # Loop para gerar os arquivos
     for i in range(number_range):
         print(f"\nGerando arquivo {i+1} de {number_range}...")
@@ -129,3 +131,7 @@ if __name__ == "__main__":
         except json.JSONDecodeError as e:
             print(f"Erro ao converter resposta para JSON: {str(e)}")
             print("Resposta recebida:", response)
+
+    print("\n=== Gerando imagens ===")
+    # Após gerar todos os prompts, chamar a função para processar as imagens
+    process_images_by_uuid(execution_uuid)
