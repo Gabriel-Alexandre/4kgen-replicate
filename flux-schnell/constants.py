@@ -53,3 +53,12 @@ REPLICATE_CONFIG = {
         "num_inference_steps": 4
     }
 }
+
+# Configurações do Upscale
+UPSCALE_CONFIG = {
+    "model": "daanelson/real-esrgan-a100:f94d7ed4a1f7e1ffed0d51e4089e4911609d5eeee5e874ef323d2c7562624bed",
+    "default_params": {
+        "scale": 4,
+        "face_enhance": False
+    }
+}
