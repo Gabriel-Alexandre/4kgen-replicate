@@ -64,18 +64,16 @@ template_images = """
             {
                 "image": "[choose a name for the image].png",
                 "prompt": "prompt1",
-                "brief_description": "brief description of the image",
-                "tags": ["tag1", "tag2", "tag3"]
             },
             {
                 "image": "[choose a name for the image].png",
                 "prompt": "prompt2",
-                "brief_description": "brief description of the image",
-                "tags": ["tag1", "tag2", "tag3"]
             },
             ...
 
-        ]
+        ],
+        "description": "description to represent all generated images",
+        "tags": ["tag1", "tag2", "tag3"]
     }
 """
 
