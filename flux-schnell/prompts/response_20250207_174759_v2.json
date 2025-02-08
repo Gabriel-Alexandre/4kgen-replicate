@@ -1,0 +1,33 @@
+{
+    "timestamp": {
+        "date": "2025-02-07",
+        "hour": "17",
+        "minute": "47",
+        "second": "59"
+    },
+    "theme": "montanhas + por do sol + nascer do sol + rios",
+    "response": {
+        "images": [
+            {
+                "image": "sunset_river_mountain.png",
+                "prompt": "A majestic mountain range bathed in a warm, golden sunset. The sky is painted with vibrant hues of pink and orange, with the sun setting behind the peaks. A winding river flows through the valley below, its surface shimmering with reflected sunlight. The water is crystal clear, revealing rocks and a few colorful fish swimming beneath the surface. Lush greenery surrounds the riverbanks, with tall trees casting long shadows at this time of day. The air is filled with the soft sound of rushing water and the gentle rustle of leaves.",
+                "brief_description": "Mountain range set against a beautiful sunset scene with a vibrant river flowing through the valley.",
+                "tags": [
+                    "mountain",
+                    "sunset",
+                    "river"
+                ]
+            },
+            {
+                "image": "sunrise_river_mountain.png",
+                "prompt": "A stunning mountain vista at sunrise, where the sky is awash in soft pinks and lavenders. The sun just begins to rise over the distant peaks, casting long shadows across the landscape. A river winds through the foreground, its surface still and calm, reflecting the early morning light. The banks of the river are lined with tall grasses and wildflowers, their colors already beginning to wake up in the cool morning air. The scene is serene and peaceful, with a sense of new beginnings.",
+                "brief_description": "Mountain range at sunrise with a tranquil river, surrounded by blooming flora.",
+                "tags": [
+                    "mountain",
+                    "sunrise",
+                    "river"
+                ]
+            }
+        ]
+    }
+}
