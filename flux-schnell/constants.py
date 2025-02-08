@@ -1,6 +1,16 @@
-template_images = """
+# API URLs e configurações
+DEFAULT_API_URL = "http://127.0.0.1:1234/v1/chat/completions"
+
+# Configurações do LM Studio
+LM_STUDIO_CONFIG = {
+    "temperature": 0.7,
+    "max_tokens": 2000
+}
+
+# Template para geração de imagens
+TEMPLATE_IMAGES = """
     You are an AI artist who generates high-quality images.
-    Your task is to generate 2, only 2 images, based on a theme provided by the user.
+    Your task is to generate 2 images, based on a theme provided by the user.
     The images must be high quality, with sharp details and vibrant colors.
     The images must be unique and non-repetitive.
     The images must be generated in a visually appealing and easy to understand style.
@@ -29,3 +39,17 @@ template_images = """
         "tags": ["tag1", "tag2", "tag3", "tag4", "tag5", "tag6", "tag7", "tag8", "tag9", "tag10"]
     }
 """
+
+# Configurações do Replicate
+REPLICATE_CONFIG = {
+    "model": "black-forest-labs/flux-schnell",
+    "default_params": {
+        "go_fast": True,
+        "megapixels": "1",
+        "num_outputs": 1,
+        "aspect_ratio": "1:1",
+        "output_format": "png",
+        "output_quality": 80,
+        "num_inference_steps": 4
+    }
+}

@@ -4,6 +4,7 @@ from datetime import datetime
 from dotenv import load_dotenv
 import json
 import requests
+from constants import REPLICATE_CONFIG
 
 def process_images_by_uuid(uuid_dir):
     """
@@ -45,17 +46,8 @@ def process_images_by_uuid(uuid_dir):
         
         # Fazer a requisição para a API
         output = replicate.run(
-            "black-forest-labs/flux-schnell",
-            input={
-                "prompt": prompt,
-                "go_fast": True,
-                "megapixels": "1",
-                "num_outputs": 1,
-                "aspect_ratio": "1:1",
-                "output_format": "png",
-                "output_quality": 80,
-                "num_inference_steps": 4
-            }
+            REPLICATE_CONFIG["model"],
+            input=REPLICATE_CONFIG["default_params"] | {"prompt": prompt}
         )
 
         print(output)

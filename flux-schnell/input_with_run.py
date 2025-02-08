@@ -4,8 +4,9 @@ from datetime import datetime
 import os
 import uuid
 from run import process_images_by_uuid  # Adicionar esta importação no topo do arquivo
+from constants import DEFAULT_API_URL, LM_STUDIO_CONFIG, TEMPLATE_IMAGES
 
-def generate_completion(prompt, api_url="http://127.0.0.1:1234/v1/chat/completions"):
+def generate_completion(prompt, api_url=DEFAULT_API_URL):
     """
     Função para gerar completions usando a API local do LM Studio
     
@@ -25,8 +26,7 @@ def generate_completion(prompt, api_url="http://127.0.0.1:1234/v1/chat/completio
                 "content": prompt
             }
         ],
-        "temperature": 0.7,
-        "max_tokens": 2000
+        **LM_STUDIO_CONFIG
     }
     
     try:
@@ -85,7 +85,7 @@ if __name__ == "__main__":
     
     about = input("Escreva um tema para as imagens que serão geradas: ")
     number_of_images = input("Escreva o número de imagens que serão geradas (deve ser par): ")
-    final_prompt = template_images.replace("[ABOUT]", about)
+    final_prompt = TEMPLATE_IMAGES.replace("[ABOUT]", about)
     number_range = int(int(number_of_images)/2)
 
     # Gerando um UUID único para esta execução
