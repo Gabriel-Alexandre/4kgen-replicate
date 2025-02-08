@@ -2,6 +2,7 @@ import requests
 import json
 from datetime import datetime
 import os
+import uuid
 
 def generate_completion(prompt, api_url="http://127.0.0.1:1234/v1/chat/completions"):
     """
@@ -80,22 +81,24 @@ template_images = """
 
 # Exemplo de uso
 if __name__ == "__main__":
-    # Criando o diretório prompts se não existir
-    if not os.path.exists("./prompts"):
-        os.makedirs("./prompts")
     
     about = input("Escreva um tema para as imagens que serão geradas: ")
     number_of_images = input("Escreva o número de imagens que serão geradas (deve ser par): ")
     final_prompt = template_images.replace("[ABOUT]", about)
     number_range = int(int(number_of_images)/2)
-    
 
-    # Loop para gerar 10 arquivos diferentes
+    # Gerando um UUID único para esta execução
+    execution_uuid = str(uuid.uuid4())
+    
+    # Criando o diretório prompts/[uuid] se não existir
+    output_dir = os.path.join("./prompts", execution_uuid)
+    os.makedirs(output_dir, exist_ok=True)
+    
+    # Loop para gerar os arquivos
     for i in range(number_range):
         print(f"\nGerando arquivo {i+1} de {number_range}...")
         response = generate_completion(final_prompt)
         
-
         # Obtendo timestamp atual
         now = datetime.now()
         timestamp = {
@@ -114,8 +117,8 @@ if __name__ == "__main__":
                 "response": response_json
             }
             
-            # Gerando nome do arquivo com timestamp e número da iteração
-            filename = f"./prompts/response_{now.strftime('%Y%m%d_%H%M%S')}_{i+1}.json"
+            # Modificando o nome do arquivo para usar o novo diretório
+            filename = os.path.join(output_dir, f"response_{now.strftime('%Y%m%d_%H%M%S')}_{i+1}.json")
             
             # Salvando o arquivo
             with open(filename, "w", encoding="utf-8") as f:
