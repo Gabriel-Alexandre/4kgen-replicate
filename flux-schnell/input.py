@@ -72,8 +72,8 @@ template_images = """
             ...
 
         ],
-        "description": "description to represent all generated images",
-        "tags": ["tag1", "tag2", "tag3"]
+        "description": "description to represent all generated images, be creative and detailed",
+        "tags": ["tag1", "tag2", "tag3", "tag4", "tag5", "tag6", "tag7", "tag8", "tag9", "tag10"]
     }
 """
 
@@ -85,7 +85,7 @@ if __name__ == "__main__":
         os.makedirs("./prompts")
     
     about = input("Escreva um tema para as imagens que serão geradas: ")
-    number_of_images = input("Escreva o número de imagens que serão geradas: ")
+    number_of_images = input("Escreva o número de imagens que serão geradas (deve ser par): ")
     final_prompt = template_images.replace("[ABOUT]", about)
     number_range = int(int(number_of_images)/2)
     
@@ -115,7 +115,7 @@ if __name__ == "__main__":
             }
             
             # Gerando nome do arquivo com timestamp e número da iteração
-            filename = f"./prompts/response_{now.strftime('%Y%m%d_%H%M%S')}_v{i+1}.json"
+            filename = f"./prompts/response_{now.strftime('%Y%m%d_%H%M%S')}_{i+1}.json"
             
             # Salvando o arquivo
             with open(filename, "w", encoding="utf-8") as f:
