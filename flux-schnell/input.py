@@ -3,9 +3,17 @@ import json
 from datetime import datetime
 import os
 import uuid
-from constants import DEFAULT_API_URL, LM_STUDIO_CONFIG, TEMPLATE_IMAGES
+import replicate
+from constants import (
+    DEFAULT_API_URL, 
+    LM_STUDIO_CONFIG, 
+    TEMPLATE_IMAGES, 
+    REPLICATE_LLM_CONFIG,
+    LLM_TYPES
+)
+from dotenv import load_dotenv
 
-def generate_completion(prompt, api_url=DEFAULT_API_URL):
+def generate_completion_local(prompt, api_url=DEFAULT_API_URL):
     """
     Função para gerar completions usando a API local do LM Studio
     
@@ -46,11 +54,55 @@ def generate_completion(prompt, api_url=DEFAULT_API_URL):
     except requests.exceptions.RequestException as e:
         return f"Erro na requisição: {str(e)}"
 
+def generate_completion_replicate(prompt):
+    load_dotenv()
+    """
+    Função para gerar completions usando o Replicate
+    """
+    try:
+        output = replicate.run(
+            REPLICATE_LLM_CONFIG["model"],
+            input={
+                "prompt": prompt,
+                **REPLICATE_LLM_CONFIG["default_params"]
+            }
+        )
+        return "".join(output)  # Junta todos os chunks do stream
+    except Exception as e:
+        return f"Erro ao usar Replicate: {str(e)}"
+
+def generate_completion(prompt, llm_type=LLM_TYPES["local"]):
+    """
+    Função wrapper para gerar completions usando o provedor escolhido
+    """
+    if llm_type == LLM_TYPES["local"]:
+        return generate_completion_local(prompt)
+    elif llm_type == LLM_TYPES["replicate"]:
+        return generate_completion_replicate(prompt)
+    else:
+        raise ValueError(f"Tipo de LLM não suportado: {llm_type}")
+
 # Exemplo de uso
 if __name__ == "__main__":
-    
     about = input("Escreva um tema para as imagens que serão geradas: ")
     number_of_images = input("Escreva o número de imagens que serão geradas (deve ser par): ")
+    
+    print("\nEscolha o tipo de LLM:")
+    print("1 - Local (LM Studio)")
+    print("2 - Replicate (Llama)")
+    llm_choice = input("Digite sua escolha (1 ou 2): ")
+    
+    try:
+        llm_choice = int(llm_choice)
+        if llm_choice not in [1, 2]:
+            print(f"Opção inválida. Usando opção 1 (Local)")
+            llm_type = LLM_TYPES["local"]
+        else:
+            llm_type = LLM_TYPES["local"] if llm_choice == 1 else LLM_TYPES["replicate"]
+    except ValueError:
+        print("Opção inválida. Usando opção 1 (Local)")
+        llm_type = LLM_TYPES["local"]
+
     final_prompt = TEMPLATE_IMAGES.replace("[ABOUT]", about)
     number_range = int(int(number_of_images)/2)
 
@@ -64,7 +116,7 @@ if __name__ == "__main__":
     # Loop para gerar os arquivos
     for i in range(number_range):
         print(f"\nGerando arquivo {i+1} de {number_range}...")
-        response = generate_completion(final_prompt)
+        response = generate_completion(final_prompt, llm_type)
         
         # Obtendo timestamp atual
         now = datetime.now()
