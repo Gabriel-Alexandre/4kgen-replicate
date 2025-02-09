@@ -1,6 +1,6 @@
-- Gerar texto pelo replicate, em vez de gerar pelo LM Studio
+- Melhorar lógica de setar número de imagens a serem geradas
 - Organizar código, organizar locais onde cada arquivo deve ficar, separar o código em funções (Para uso pessoal/Opensource)
-- Adicionar processamento de imagens seguindo o padrão que eu já utilizo no passo a passo que executo (já seguindo a estrutura de pastas/funções definidas anteriormente)
 - Criar interface visual para desktop usando alguma lib python
     - Avaliar melhor framework para criar a interface
     - Analisar e definir todas funcionalidades que serão adicionadas na interface (MVP)
+- Criar arquivo executável para windows
