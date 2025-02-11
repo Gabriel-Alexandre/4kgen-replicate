@@ -1,6 +1,42 @@
+*Melhorias*
 - Melhorar lógica de setar número de imagens a serem geradas
-- Organizar código, organizar locais onde cada arquivo deve ficar, separar o código em funções (Para uso pessoal/Opensource)
-- Criar interface visual para desktop usando alguma lib python
-    - Avaliar melhor framework para criar a interface
-    - Analisar e definir todas funcionalidades que serão adicionadas na interface (MVP)
-- Criar arquivo executável para windows
+- pente fino na geração do JSON de prompts (organização, teste, tratamento de erro, ...)
+    - componentizar funcionalidades
+    - adicionar tratamento de erro
+    - criar forma de usar via arquivo normal e no fluxo completo
+    - documentação  
+    - organizar código
+    - internacionalização
+- pente fino na geração de imagens (organização, teste, tratamento de erro, ...)
+    - componentizar funcionalidades
+    - adicionar tratamento de erro
+    - criar forma de usar via arquivo normal e no fluxo completo
+    - documentação  
+    - organizar código
+    - internacionalização
+- pente fino na transformação em upscaled (organização, teste, tratamento de erro, ...)
+    - componentizar funcionalidades
+    - adicionar tratamento de erro
+    - criar forma de usar via arquivo normal e no fluxo completo
+    - documentação  
+    - organizar código
+    - internacionalização
+- pente fino no pos-processamento de imagens (organização, teste, tratamento de erro, ...)
+    - componentizar funcionalidades
+    - adicionar tratamento de erro
+    - criar forma de usar via arquivo normal e no fluxo completo
+    - documentação  
+    - organizar código
+    - internacionalização
+- pente fino na execução do fluxo completo (organização, teste, tratamento de erro, ...)
+    - componentizar funcionalidades
+    - adicionar tratamento de erro
+    - documentação  
+    - organizar código
+    - internacionalização
+    
+*Documentação, configuração e divulgação*
+- escrever README.md e documentar o projeto (dependências, setup, documentação, donate, ...)
+- adicionar licença ao projeto
+- divulgar projeto
+
