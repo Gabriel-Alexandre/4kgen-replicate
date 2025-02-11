@@ -37,6 +37,7 @@
     
 *Documentação, configuração e divulgação*
 - escrever README.md e documentar o projeto (dependências, setup, documentação, donate, ...)
+    - para para definir passo a passo de como será a documentação, e ordem lógica do texto
 - adicionar licença ao projeto
 - divulgar projeto
 
