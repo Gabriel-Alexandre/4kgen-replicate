@@ -85,8 +85,21 @@ def generate_completion(prompt, llm_type=LLM_TYPES["local"]):
 # Exemplo de uso
 if __name__ == "__main__":
     about = input("Escreva um tema para as imagens que serão geradas: ")
-    number_of_images = input("Escreva o número de imagens que serão geradas (deve ser par): ")
+    number_of_images = input("Escreva o número de imagens que serão geradas: ")
     
+    try:
+        number_of_images = int(number_of_images)
+        if number_of_images < 1:
+            print("Número inválido. Usando 1 imagem.")
+            number_of_images = 1
+    except ValueError:
+        print("Número inválido. Usando 1 imagem.")
+        number_of_images = 1
+
+    # Calculando o número de iterações e imagens por JSON
+    remaining_images = number_of_images
+    iterations = (number_of_images + 1) // 2  # Arredonda para cima
+
     print("\nEscolha o tipo de LLM:")
     print("1 - Local (LM Studio)")
     print("2 - Replicate (Llama)")
@@ -104,7 +117,6 @@ if __name__ == "__main__":
         llm_type = LLM_TYPES["local"]
 
     final_prompt = TEMPLATE_IMAGES.replace("[ABOUT]", about)
-    number_range = int(int(number_of_images)/2)
 
     # Gerando um UUID único para esta execução
     execution_uuid = str(uuid.uuid4())
@@ -114,9 +126,17 @@ if __name__ == "__main__":
     os.makedirs(output_dir, exist_ok=True)
     
     # Loop para gerar os arquivos
-    for i in range(number_range):
-        print(f"\nGerando arquivo {i+1} de {number_range}...")
-        response = generate_completion(final_prompt, llm_type)
+    for i in range(iterations):
+        # Determina quantas imagens gerar nesta iteração
+        images_this_iteration = 2 if remaining_images >= 2 else 1
+        
+        # Atualiza o template com o número correto de imagens
+        current_prompt = final_prompt.replace("[NUM_IMAGES]", str(images_this_iteration))
+        
+        print(f"\nGerando arquivo {i+1} de {iterations}...")
+        response = generate_completion(current_prompt, llm_type)
+        
+        remaining_images -= images_this_iteration
         
         # Obtendo timestamp atual
         now = datetime.now()

@@ -1,0 +1,36 @@
+{
+    "timestamp": {
+        "date": "2025-02-13",
+        "hour": "19",
+        "minute": "54",
+        "second": "17"
+    },
+    "theme": "jardin",
+    "response": {
+        "images": [
+            {
+                "image": "jardin1.png",
+                "prompt": "A serene French-inspired garden with a stone fountain at its center, surrounded by lush greenery, vibrant flowers, and a meandering stone path. The sky above is a warm blue with puffy white clouds. The garden is filled with the sweet scent of blooming roses and the soft chirping of birds."
+            },
+            {
+                "image": "jardin2.png",
+                "prompt": "A tranquil Japanese-style garden with a tranquil pond, surrounded by moss-covered rocks, bamboo trees, and a variety of colorful flowers. The sky above is a soft gray with wispy clouds. The atmosphere is peaceful, with the gentle sound of water and the rustling of leaves in the breeze."
+            }
+        ],
+        "description": "Two high-quality images of serene and tranquil gardens, each with its own unique style and features.",
+        "tags": [
+            "garden",
+            "nature",
+            "flowers",
+            "plants",
+            "stone",
+            "fountain",
+            "pond",
+            "bamboo",
+            "moss",
+            "peaceful",
+            "tranquil",
+            "serene"
+        ]
+    }
+}

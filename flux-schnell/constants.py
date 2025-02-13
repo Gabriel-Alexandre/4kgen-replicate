@@ -9,7 +9,7 @@ LM_STUDIO_CONFIG = {
 
 # Template para geração de imagens
 TEMPLATE_IMAGES = """You are an AI artist who generates high-quality images.
-Your task is to generate 2 images, based on a theme provided by the user.
+Your task is to generate [NUM_IMAGES] image(s), based on a theme provided by the user.
 The images must be high quality, with sharp details and vibrant colors.
 The images must be unique and non-repetitive.
 The images must be generated in a visually appealing and easy to understand style.
@@ -22,16 +22,12 @@ Prompt must be in english.
 IMPORTANT: Your response must be ONLY a valid JSON object, with no additional text before or after.
 The theme is: [ABOUT]
 
-Example of valid response format:
+Example of valid response format (can be more than one image, will be [NUM_IMAGES] images):
 {
     "images": [
         {
             "image": "name1.png",
             "prompt": "prompt1"
-        },
-        {
-            "image": "name2.png",
-            "prompt": "prompt2"
         }
     ],
     "description": "description of all images",
