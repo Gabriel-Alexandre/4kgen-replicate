@@ -125,5 +125,5 @@ def process_upscale_by_uuid(uuid_dir):
 if __name__ == "__main__":
     # Exemplo de uso
     uuid = input("Digite o UUID do diretório a ser processado: ")
-    # process_images_by_uuid(uuid)
-    process_upscale_by_uuid(uuid)
+    process_images_by_uuid(uuid)
+    # process_upscale_by_uuid(uuid)

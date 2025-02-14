@@ -1,0 +1,30 @@
+{
+    "timestamp": {
+        "date": "2025-02-14",
+        "hour": "15",
+        "minute": "58",
+        "second": "40"
+    },
+    "theme": "dia dos namorados",
+    "response": {
+        "images": [
+            {
+                "image": "love_day_landscape.png",
+                "prompt": "A romantic dia dos namorados landscape with a soft pink and red sky during sunset, a couple embracing under a starry night sky, lush greenery, vibrant wildflowers in the foreground, golden hues of sun rays filtering through the trees, intricate patterns on the grass resembling heart shapes, subtle glows around the lovers creating an enchanting atmosphere"
+            }
+        ],
+        "description": "A visually appealing and romantic dia dos namorados landscape with a soft pink and red sky during sunset featuring a couple embracing under a starry night sky",
+        "tags": [
+            "love_day",
+            "romantic_landscape",
+            "Dia_de_s_Namorados",
+            "sunrise_sunset",
+            "embrace",
+            "starry_night",
+            "greenery",
+            "wildflowers",
+            "heart_shapes",
+            "glow"
+        ]
+    }
+}

@@ -4,6 +4,7 @@ from datetime import datetime
 import os
 import uuid
 import replicate
+from typing import Dict
 from constants import (
     DEFAULT_API_URL, 
     LM_STUDIO_CONFIG, 
@@ -13,158 +14,161 @@ from constants import (
 )
 from dotenv import load_dotenv
 
-def generate_completion_local(prompt, api_url=DEFAULT_API_URL):
-    """
-    Função para gerar completions usando a API local do LM Studio
-    
-    Args:
-        prompt (str): O texto de entrada para o modelo
-        api_url (str): URL da API local (padrão para LM Studio)
-    
-    Returns:
-        str: A resposta gerada pelo modelo
-    """
-    
-    # Preparando o payload no formato esperado
-    payload = {
-        "messages": [
-            {
-                "role": "user",
-                "content": prompt
-            }
-        ],
-        **LM_STUDIO_CONFIG
-    }
-    
-    try:
-        # Fazendo a requisição POST
-        response = requests.post(
-            api_url,
-            json=payload,
-            headers={"Content-Type": "application/json"}
-        )
-        
-        # Verificando se a requisição foi bem sucedida
-        if response.status_code == 200:
-            result = response.json()
-            return result["choices"][0]["message"]["content"]
-        else:
-            return f"Erro: Status code {response.status_code}"
-            
-    except requests.exceptions.RequestException as e:
-        return f"Erro na requisição: {str(e)}"
+PATH_TO_PROMPTS = "./prompts"
+MAX_RETRIES = 5
 
-def generate_completion_replicate(prompt):
-    load_dotenv()
-    """
-    Função para gerar completions usando o Replicate
-    """
-    try:
-        output = replicate.run(
-            REPLICATE_LLM_CONFIG["model"],
-            input={
-                "prompt": prompt,
-                **REPLICATE_LLM_CONFIG["default_params"]
-            }
-        )
-        return "".join(output)  # Junta todos os chunks do stream
-    except Exception as e:
-        return f"Erro ao usar Replicate: {str(e)}"
+class PromptGenerator:
+    def __init__(self, theme: str, num_images: int, llm_type: str = LLM_TYPES["local"]):
+        self.theme = theme
+        self.num_images = self._validate_num_images(num_images)
+        self.llm_type = self._validate_llm_type(llm_type)
+        self.execution_uuid = str(uuid.uuid4())
+        self.output_dir = self._create_output_directory()
 
-def generate_completion(prompt, llm_type=LLM_TYPES["local"]):
-    """
-    Função wrapper para gerar completions usando o provedor escolhido
-    """
-    if llm_type == LLM_TYPES["local"]:
-        return generate_completion_local(prompt)
-    elif llm_type == LLM_TYPES["replicate"]:
-        return generate_completion_replicate(prompt)
-    else:
-        raise ValueError(f"Tipo de LLM não suportado: {llm_type}")
+    @staticmethod
+    def _validate_num_images(num: int) -> int:
+        try:
+            num = int(num)
+            return max(1, num)
+        except ValueError:
+            return 1
 
-# Exemplo de uso
-if __name__ == "__main__":
-    about = input("Escreva um tema para as imagens que serão geradas: ")
-    number_of_images = input("Escreva o número de imagens que serão geradas: ")
-    
-    try:
-        number_of_images = int(number_of_images)
-        if number_of_images < 1:
-            print("Número inválido. Usando 1 imagem.")
-            number_of_images = 1
-    except ValueError:
-        print("Número inválido. Usando 1 imagem.")
-        number_of_images = 1
+    @staticmethod
+    def _validate_llm_type(llm_type: str) -> str:
+        if llm_type not in [LLM_TYPES["local"], LLM_TYPES["replicate"]]:
+            return LLM_TYPES["local"]
+        return llm_type
 
-    # Calculando o número de iterações e imagens por JSON
-    remaining_images = number_of_images
-    iterations = (number_of_images + 1) // 2  # Arredonda para cima
+    def _create_output_directory(self) -> str:
+        output_dir = os.path.join(PATH_TO_PROMPTS, self.execution_uuid)
+        os.makedirs(output_dir, exist_ok=True)
+        return output_dir
 
-    print("\nEscolha o tipo de LLM:")
-    print("1 - Local (LM Studio)")
-    print("2 - Replicate (Llama)")
-    llm_choice = input("Digite sua escolha (1 ou 2): ")
-    
-    try:
-        llm_choice = int(llm_choice)
-        if llm_choice not in [1, 2]:
-            print(f"Opção inválida. Usando opção 1 (Local)")
-            llm_type = LLM_TYPES["local"]
-        else:
-            llm_type = LLM_TYPES["local"] if llm_choice == 1 else LLM_TYPES["replicate"]
-    except ValueError:
-        print("Opção inválida. Usando opção 1 (Local)")
-        llm_type = LLM_TYPES["local"]
-
-    final_prompt = TEMPLATE_IMAGES.replace("[ABOUT]", about)
-
-    # Gerando um UUID único para esta execução
-    execution_uuid = str(uuid.uuid4())
-    
-    # Criando o diretório prompts/[uuid] se não existir
-    output_dir = os.path.join("./prompts", execution_uuid)
-    os.makedirs(output_dir, exist_ok=True)
-    
-    # Loop para gerar os arquivos
-    for i in range(iterations):
-        # Determina quantas imagens gerar nesta iteração
-        images_this_iteration = 2 if remaining_images >= 2 else 1
-        
-        # Atualiza o template com o número correto de imagens
-        current_prompt = final_prompt.replace("[NUM_IMAGES]", str(images_this_iteration))
-        
-        print(f"\nGerando arquivo {i+1} de {iterations}...")
-        response = generate_completion(current_prompt, llm_type)
-        
-        remaining_images -= images_this_iteration
-        
-        # Obtendo timestamp atual
+    def _generate_timestamp(self) -> Dict[str, str]:
         now = datetime.now()
-        timestamp = {
+        return {
             "date": now.strftime("%Y-%m-%d"),
             "hour": now.strftime("%H"),
             "minute": now.strftime("%M"),
             "second": now.strftime("%S")
         }
-        
-        # Criando o objeto JSON final
+
+    def _save_response(self, response: str, iteration: int) -> None:
         try:
-            response_json = json.loads(response)  # Convertendo a string para JSON
+            response_json = json.loads(response)
             final_json = {
-                "timestamp": timestamp,
-                "theme": about,
+                "timestamp": self._generate_timestamp(),
+                "theme": self.theme,
                 "response": response_json
             }
             
-            # Modificando o nome do arquivo para usar o novo diretório
-            filename = os.path.join(output_dir, f"response_{now.strftime('%Y%m%d_%H%M%S')}_{i+1}.json")
+            now = datetime.now()
+            filename = os.path.join(
+                self.output_dir, 
+                f"response_{now.strftime('%Y%m%d_%H%M%S')}_{iteration+1}.json"
+            )
             
-            # Salvando o arquivo
             with open(filename, "w", encoding="utf-8") as f:
                 json.dump(final_json, f, ensure_ascii=False, indent=4)
-                
-            print(f"Arquivo salvo com sucesso em: {filename}")
+            
+            print(f"File successfully saved at: {filename}")
                 
         except json.JSONDecodeError as e:
-            print(f"Erro ao converter resposta para JSON: {str(e)}")
-            print("Resposta recebida:", response)
+            raise ValueError(f"Error converting response to JSON: {str(e)}")
+
+    def generate_prompts(self) -> None:
+        remaining_images = self.num_images
+        iterations = (self.num_images + 1) // 2
+        retries = 0
+
+        i = 0
+        while i < iterations:
+            try:
+                images_this_iteration = min(2, remaining_images)
+                current_prompt = TEMPLATE_IMAGES.replace("[ABOUT]", self.theme)
+                current_prompt = current_prompt.replace("[NUM_IMAGES]", str(images_this_iteration))
+                
+                print(f"\nGenerating file {i+1} of {iterations}...")
+                response = self._generate_completion(current_prompt)
+                
+                self._save_response(response, i)
+                remaining_images -= images_this_iteration
+                i += 1
+
+            except Exception as e:
+                if retries < MAX_RETRIES:
+                    while retries < MAX_RETRIES:
+                        try:
+                            print(f"Error in iteration {i+1}. Retrying... (Attempt {retries + 1} of {MAX_RETRIES})")
+                            response = self._generate_completion(current_prompt)
+                            self._save_response(response, i)
+                            remaining_images -= images_this_iteration
+                            i += 1
+                            break
+                        except Exception as retry_error:
+                            retries += 1
+                            if retries >= MAX_RETRIES:
+                                print(f"Maximum number of retries reached for iteration {i+1}. Skipping to the next one.")
+                                i += 1
+                else:
+                    print(f"Maximum number of retries reached. Ending generation.")
+                    break
+
+    def _generate_completion(self, prompt: str) -> str:
+        if self.llm_type == LLM_TYPES["local"]:
+            return self._generate_completion_local(prompt)
+        return self._generate_completion_replicate(prompt)
+
+    def _generate_completion_local(self, prompt: str) -> str:
+        payload = {
+            "messages": [{"role": "user", "content": prompt}],
+            **LM_STUDIO_CONFIG
+        }
+        
+        try:
+            response = requests.post(
+                DEFAULT_API_URL,
+                json=payload,
+                headers={"Content-Type": "application/json"}
+            )
+            
+            if response.status_code == 200:
+                result = response.json()
+                return result["choices"][0]["message"]["content"]
+            
+            raise ValueError(f"API error: Status code {response.status_code}")
+            
+        except requests.exceptions.RequestException as e:
+            raise ValueError(f"Request error: {str(e)}")
+
+    def _generate_completion_replicate(self, prompt: str) -> str:
+        load_dotenv()
+        try:
+            output = replicate.run(
+                REPLICATE_LLM_CONFIG["model"],
+                input={"prompt": prompt, **REPLICATE_LLM_CONFIG["default_params"]}
+            )
+            return "".join(output)
+        except Exception as e:
+            raise ValueError(f"Replicate error: {str(e)}")
+
+def main():
+    try:
+        about = input("Write a THEME for the images that will be generated: ")
+        num_images = input("Write the NUMBER of images that will be generated: ")
+        
+        print("\nChoose the LLM TYPE:")
+        print("1 - Local (LM Studio)")
+        print("2 - Replicate (Llama)")
+        llm_choice = input("Enter your choice (1 or 2): ")
+        
+        llm_type = LLM_TYPES["local"] if llm_choice == "1" else LLM_TYPES["replicate"]
+        
+        generator = PromptGenerator(about, int(num_images), llm_type)
+        generator.generate_prompts()
+        
+    except Exception as e:
+        print(f"Error during execution: {str(e)}")
+
+if __name__ == "__main__":
+    main()
