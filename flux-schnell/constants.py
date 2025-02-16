@@ -73,6 +73,7 @@ LLM_TYPES = {
 }
 
 # Paths
+PATH_TO_OUTPUT = "./output"
 PATH_TO_PROMPTS = "./prompts"
 PATH_TO_UPSCALE = "./upscaly"
 PATH_TO_POS_PROCESS = "./pos_process"
