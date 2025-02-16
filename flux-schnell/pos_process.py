@@ -1,11 +1,7 @@
 import os
 import subprocess
 from typing import List
-
-MAX_RETRIES = 5
-PATH_TO_UPSCALE = "./upscaly"
-PATH_TO_POS_PROCESS = "./pos_process"
-
+from constants import MAX_RETRIES
 class ImagePostProcessor:
     def __init__(self, uuid_dir: str, input_folder: str = "upscaly"):
         """

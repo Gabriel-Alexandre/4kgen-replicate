@@ -1,111 +1,151 @@
-import requests
-import json
-from datetime import datetime
-import os
 import uuid
-from run import process_images_by_uuid, process_upscale_by_uuid  # Adicionar esta importação no topo do arquivo
-from constants import DEFAULT_API_URL, LM_STUDIO_CONFIG, TEMPLATE_IMAGES
+from run import ImageProcessor
+from input import PromptGenerator
+from pos_process import ImagePostProcessor
+from constants import LLM_TYPES
 
-def generate_completion(prompt, api_url=DEFAULT_API_URL):
-    """
-    Função para gerar completions usando a API local do LM Studio
-    
-    Args:
-        prompt (str): O texto de entrada para o modelo
-        api_url (str): URL da API local (padrão para LM Studio)
-    
-    Returns:
-        str: A resposta gerada pelo modelo
-    """
-    
-    # Preparando o payload no formato esperado
-    payload = {
-        "messages": [
-            {
-                "role": "user",
-                "content": prompt
-            }
-        ],
-        **LM_STUDIO_CONFIG
-    }
-    
+class CompleteFlowProcessor:
+    def __init__(self, theme: str, num_images: int, llm_type: str = LLM_TYPES["local"]):
+        """
+        Initialize the complete flow processor.
+        
+        Args:
+            theme (str): Theme for image generation
+            num_images (int): Number of images to generate
+            llm_type (str): Type of LLM to use (local or replicate)
+        """
+        self.theme = theme
+        self.num_images = self._validate_num_images(num_images)
+        self.llm_type = self._validate_llm_type(llm_type)
+        self.execution_uuid = str(uuid.uuid4())
+
+    @staticmethod
+    def _validate_num_images(num: int) -> int:
+        """
+        Validate and adjust the number of images
+        
+        Args:
+            num (int): Number of images to validate
+            
+        Returns:
+            int: Validated number of images
+        """
+        try:
+            num = int(num)
+            return max(1, num)
+        except ValueError:
+            return 1
+
+    @staticmethod
+    def _validate_llm_type(llm_type: str) -> str:
+        """
+        Validate the LLM type
+        
+        Args:
+            llm_type (str): LLM type to validate
+            
+        Returns:
+            str: Validated LLM type
+        """
+        if llm_type not in [LLM_TYPES["local"], LLM_TYPES["replicate"]]:
+            return LLM_TYPES["local"]
+        return llm_type
+
+    def process_complete_flow(self) -> None:
+        """Execute the complete flow of prompt generation and image processing"""
+        try:
+            # Step 1: Generate Prompts
+            print("\n=== Generating prompts ===")
+            prompt_generator = PromptGenerator(
+                theme=self.theme,
+                num_images=self.num_images,
+                llm_type=self.llm_type
+            )
+            prompt_generator.execution_uuid = self.execution_uuid
+            prompt_generator.output_dir = prompt_generator._create_output_directory()
+            prompt_generator.generate_prompts()
+            
+            # Step 2: Generate Images
+            print("\n=== Generating images ===")
+            image_processor = ImageProcessor(self.execution_uuid)
+            image_processor.process_images()
+
+            # Step 3: Generate Upscales
+            print("\n=== Generating image upscales ===")
+            image_processor.process_upscale()
+
+            # Step 4: Post-process upscaled images
+            print("\n=== Post-processing upscaled images ===")
+            post_processor = ImagePostProcessor(
+                uuid_dir=self.execution_uuid,
+                input_folder="upscaly"
+            )
+            post_processor.process_images()
+
+            print("\nComplete flow executed successfully!")
+            print(f"Execution UUID: {self.execution_uuid}")
+
+        except Exception as e:
+            print(f"Error during complete flow execution: {str(e)}")
+
+def main():
     try:
-        # Fazendo a requisição POST
-        response = requests.post(
-            api_url,
-            json=payload,
-            headers={"Content-Type": "application/json"}
+        # Get theme input
+        theme = input("Enter a theme for the images to be generated: ")
+        
+        # Get number of images input
+        while True:
+            try:
+                num_images = int(input("Enter the number of images to be generated: "))
+                if num_images > 0:
+                    break
+                print("Please enter a number greater than 0")
+            except ValueError:
+                print("Please enter a valid number")
+
+        # Get LLM type input
+        print("\nChoose the LLM TYPE:")
+        print("1 - Local (LM Studio)")
+        print("2 - Replicate (Llama)")
+        
+        while True:
+            llm_choice = input("Enter your choice (1 or 2): ")
+            if llm_choice in ['1', '2']:
+                break
+            print("Please enter 1 or 2")
+
+        llm_type = LLM_TYPES["local"] if llm_choice == "1" else LLM_TYPES["replicate"]
+
+        # Initialize and run complete flow
+        processor = CompleteFlowProcessor(
+            theme=theme,
+            num_images=num_images,
+            llm_type=llm_type
         )
         
-        # Verificando se a requisição foi bem sucedida
-        if response.status_code == 200:
-            result = response.json()
-            return result["choices"][0]["message"]["content"]
+        # Show execution plan
+        print("\nExecution plan:")
+        print("1. Generate prompts using selected LLM")
+        print("2. Generate images from prompts")
+        print("3. Upscale generated images")
+        print("4. Post-process upscaled images")
+        
+        # Confirm execution
+        while True:
+            confirm = input("\nProceed with execution? (y/n): ").lower()
+            if confirm in ['y', 'n']:
+                break
+            print("Please enter 'y' or 'n'")
+
+        if confirm == 'y':
+            processor.process_complete_flow()
         else:
-            return f"Erro: Status code {response.status_code}"
-            
-    except requests.exceptions.RequestException as e:
-        return f"Erro na requisição: {str(e)}"
+            print("Execution cancelled by user")
+        
+    except Exception as e:
+        print(f"Error during execution: {str(e)}")
+    finally:
+        print("\nExecution finished")
 
-
-
-
-# Exemplo de uso
 if __name__ == "__main__":
-    
-    about = input("Escreva um tema para as imagens que serão geradas: ")
-    number_of_images = input("Escreva o número de imagens que serão geradas (deve ser par): ")
-    final_prompt = TEMPLATE_IMAGES.replace("[ABOUT]", about)
-    number_range = int(int(number_of_images)/2)
-
-    # Gerando um UUID único para esta execução
-    execution_uuid = str(uuid.uuid4())
-    
-    # Criando o diretório prompts/[uuid] se não existir
-    output_dir = os.path.join("./prompts", execution_uuid)
-    os.makedirs(output_dir, exist_ok=True)
-    
-    print("\n=== Gerando prompts ===")
-    # Loop para gerar os arquivos
-    for i in range(number_range):
-        print(f"\nGerando arquivo {i+1} de {number_range}...")
-        response = generate_completion(final_prompt)
-        
-        # Obtendo timestamp atual
-        now = datetime.now()
-        timestamp = {
-            "date": now.strftime("%Y-%m-%d"),
-            "hour": now.strftime("%H"),
-            "minute": now.strftime("%M"),
-            "second": now.strftime("%S")
-        }
-        
-        # Criando o objeto JSON final
-        try:
-            response_json = json.loads(response)  # Convertendo a string para JSON
-            final_json = {
-                "timestamp": timestamp,
-                "theme": about,
-                "response": response_json
-            }
-            
-            # Modificando o nome do arquivo para usar o novo diretório
-            filename = os.path.join(output_dir, f"response_{now.strftime('%Y%m%d_%H%M%S')}_{i+1}.json")
-            
-            # Salvando o arquivo
-            with open(filename, "w", encoding="utf-8") as f:
-                json.dump(final_json, f, ensure_ascii=False, indent=4)
-                
-            print(f"Arquivo salvo com sucesso em: {filename}")
-                
-        except json.JSONDecodeError as e:
-            print(f"Erro ao converter resposta para JSON: {str(e)}")
-            print("Resposta recebida:", response)
-
-    print("\n=== Gerando imagens ===")
-    # Após gerar todos os prompts, chamar a função para processar as imagens
-    process_images_by_uuid(execution_uuid)
-
-    print("\n=== Gerando upscale das imagens ===")
-    # Após gerar as imagens, chamar a função para fazer o upscale
-    process_upscale_by_uuid(execution_uuid)
+    main()

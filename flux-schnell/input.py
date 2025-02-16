@@ -10,12 +10,12 @@ from constants import (
     LM_STUDIO_CONFIG, 
     TEMPLATE_IMAGES, 
     REPLICATE_LLM_CONFIG,
-    LLM_TYPES
+    LLM_TYPES,
+    PATH_TO_PROMPTS,
+    MAX_RETRIES
 )
 from dotenv import load_dotenv
 
-PATH_TO_PROMPTS = "./prompts"
-MAX_RETRIES = 5
 
 class PromptGenerator:
     def __init__(self, theme: str, num_images: int, llm_type: str = LLM_TYPES["local"]):

@@ -4,12 +4,8 @@ from datetime import datetime
 from dotenv import load_dotenv
 import json
 import requests
-from constants import REPLICATE_CONFIG, UPSCALE_CONFIG
+from constants import REPLICATE_CONFIG, UPSCALE_CONFIG, PATH_TO_PROMPTS, PATH_TO_OUTPUT, PATH_TO_UPSCALE, MAX_RETRIES
 
-MAX_RETRIES = 5
-PATH_TO_PROMPTS = "./prompts"
-PATH_TO_OUTPUT = "./output"
-PATH_TO_UPSCALE = "./upscaly"
 
 class ImageProcessor:
     def __init__(self, uuid_dir: str):
