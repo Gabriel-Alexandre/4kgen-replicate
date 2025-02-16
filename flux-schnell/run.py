@@ -6,124 +6,153 @@ import json
 import requests
 from constants import REPLICATE_CONFIG, UPSCALE_CONFIG
 
-def process_images_by_uuid(uuid_dir):
-    """
-    Processa todos os arquivos JSON dentro de um diretório UUID específico e gera imagens.
-    
-    Args:
-        uuid_dir (str): UUID do diretório a ser processado
-    """
-    # Carregar variáveis de ambiente do arquivo .env
-    load_dotenv()
+MAX_RETRIES = 5
+PATH_TO_PROMPTS = "./prompts"
+PATH_TO_OUTPUT = "./output"
+PATH_TO_UPSCALE = "./upscaly"
 
-    # Definir o diretório específico do UUID
-    prompts_dir = os.path.join('prompts', uuid_dir)
-    all_prompts = []
+class ImageProcessor:
+    def __init__(self, uuid_dir: str):
+        self.uuid_dir = uuid_dir
+        load_dotenv()
+        self.prompts_dir = os.path.join(PATH_TO_PROMPTS, uuid_dir)
+        self.output_dir = os.path.join(PATH_TO_OUTPUT, uuid_dir)
+        self.upscale_dir = os.path.join(PATH_TO_UPSCALE, uuid_dir)
+        self._create_output_directories()
 
-    # Verificar se o diretório existe
-    if not os.path.exists(prompts_dir):
-        print(f"Diretório não encontrado: {prompts_dir}")
-        return
+    def _create_output_directories(self) -> None:
+        """Create the necessary output directories"""
+        os.makedirs(self.output_dir, exist_ok=True)
+        os.makedirs(self.upscale_dir, exist_ok=True)
 
-    # Percorrer todos os arquivos no diretório do UUID
-    for filename in os.listdir(prompts_dir):
-        if filename.endswith('.json'):
-            file_path = os.path.join(prompts_dir, filename)
-            with open(file_path, 'r') as f:
-                json_data = json.load(f)
-                prompts = [image['prompt'] for image in json_data['response']['images']]
-                all_prompts.extend(prompts)
+    def _collect_prompts(self) -> list:
+        """Collect all prompts from JSON files"""
+        if not os.path.exists(self.prompts_dir):
+            raise ValueError(f"Directory not found: {self.prompts_dir}")
 
-    # Criar diretório de output se não existir
-    output_dir = os.path.join("./output", uuid_dir)
-    if not os.path.exists(output_dir):
-        os.makedirs(output_dir)
+        all_prompts = []
+        for filename in os.listdir(self.prompts_dir):
+            if filename.endswith('.json'):
+                with open(os.path.join(self.prompts_dir, filename), 'r') as f:
+                    json_data = json.load(f)
+                    prompts = [image['prompt'] for image in json_data['response']['images']]
+                    all_prompts.extend(prompts)
+        return all_prompts
 
-    # Processar cada prompt sequencialmente
-    for prompt in all_prompts:
-        # Gerar timestamp único para o nome do arquivo
+    def _generate_image(self, prompt: str, retries: int = 0) -> str:
+        """Generate an image using Replicate"""
+        if retries >= MAX_RETRIES:
+            raise Exception("Maximum number of retries reached")
+
+        try:
+            output = replicate.run(
+                REPLICATE_CONFIG["model"],
+                input=REPLICATE_CONFIG["default_params"] | {"prompt": prompt}
+            )
+            return output[0]
+        except Exception as e:
+            print(f"Error generating image (attempt {retries + 1}): {str(e)}")
+            return self._generate_image(prompt, retries + 1)
+
+    def _save_image(self, image_url: str) -> str:
+        """Download and save the image"""
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        output_path = os.path.join(self.output_dir, f"{timestamp}.png")
         
-        # Fazer a requisição para a API
-        output = replicate.run(
-            REPLICATE_CONFIG["model"],
-            input=REPLICATE_CONFIG["default_params"] | {"prompt": prompt}
-        )
-
-        print(output)
-        
-        # O output é uma URL da imagem gerada
-        image_url = output[0]
-        
-        # Baixar e salvar a imagem usando requests
         response = requests.get(image_url)
-        output_path = os.path.join(output_dir, f"{timestamp}.png")
-        
         with open(output_path, "wb") as f:
             f.write(response.content)
+        return output_path
+
+    def _upscale_image(self, input_path: str, retries: int = 0) -> str:
+        """Perform upscale of an image"""
+        if retries >= MAX_RETRIES:
+            raise Exception("Maximum number of retries reached")
+
+        try:
+            with open(input_path, "rb") as f:
+                output = replicate.run(
+                    UPSCALE_CONFIG["model"],
+                    input=UPSCALE_CONFIG["default_params"] | {"image": f}
+                )
+            return str(output)
+        except Exception as e:
+            print(f"Error making upscale (attempt {retries + 1}): {str(e)}")
+            return self._upscale_image(input_path, retries + 1)
+
+    def _validate_output_directory(self) -> bool:
+        """Validate if the output directory exists and contains images"""
+        if not os.path.exists(self.output_dir):
+            print(f"Error: Directory not found: {self.output_dir}")
+            return False
         
-        print(f"Imagem salva em: {output_path}")
-
-def process_upscale_by_uuid(uuid_dir):
-    """
-    Processa todas as imagens dentro do diretório output/uuid e gera versões upscaled.
-    
-    Args:
-        uuid_dir (str): UUID do diretório a ser processado
-    """
-    # Carregar variáveis de ambiente do arquivo .env
-    load_dotenv()
-
-    # Definir os diretórios
-    input_dir = os.path.join("./output", uuid_dir)
-    output_dir = os.path.join("./upscaly", uuid_dir)
-
-    # Verificar se o diretório de entrada existe
-    if not os.path.exists(input_dir):
-        print(f"Diretório de entrada não encontrado: {input_dir}")
-        return
-
-    # Criar diretório de output se não existir
-    if not os.path.exists(output_dir):
-        os.makedirs(output_dir)
-
-    # Processar cada imagem no diretório
-    for filename in os.listdir(input_dir):
-        if filename.endswith(('.png', '.jpg', '.jpeg')):
-            input_path = os.path.join(input_dir, filename)
+        image_files = [f for f in os.listdir(self.output_dir) 
+                      if f.endswith(('.png', '.jpg', '.jpeg'))]
+        if not image_files:
+            print(f"Error: No images found in the directory: {self.output_dir}")
+            return False
             
-            # Preparar o caminho de saída
-            output_filename = f"upscaled_{filename}"
-            output_path = os.path.join(output_dir, output_filename)
+        return True
 
-            print(f"Processando upscale de: {filename}")
+    def process_images(self) -> None:
+        """Process all prompts and generate images"""
+        try:
+            prompts = self._collect_prompts()
+            for prompt in prompts:
+                try:
+                    image_url = self._generate_image(prompt)
+                    saved_path = self._save_image(image_url)
+                    print(f"Image saved in: {saved_path}")
+                except Exception as e:
+                    print(f"Error processing prompt: {str(e)}")
 
-            try:
-                # Abrir a imagem como arquivo binário para enviar diretamente
-                with open(input_path, "rb") as f:
-                    # Fazer a requisição de upscale enviando o arquivo diretamente
-                    output = replicate.run(
-                        UPSCALE_CONFIG["model"],
-                        input=UPSCALE_CONFIG["default_params"] | {"image": f}
-                    )
+        except Exception as e:
+            print(f"Error during image processing: {str(e)}")
 
-                print(output)
+    def process_upscale(self) -> None:
+        """Process the upscale of all images in the output directory"""
+        if not self._validate_output_directory():
+            return
 
-                # O output é uma URL da imagem upscaled
-                upscaled_url = str(output)  # Convertendo o FileOutput para string
+        try:
+            for filename in os.listdir(self.output_dir):
+                if filename.endswith(('.png', '.jpg', '.jpeg')):
+                    input_path = os.path.join(self.output_dir, filename)
+                    output_path = os.path.join(self.upscale_dir, f"upscaled_{filename}")
 
-                # Baixar e salvar a imagem upscaled
-                response = requests.get(upscaled_url)
-                with open(output_path, "wb") as f:
-                    f.write(response.content)
+                    try:
+                        print(f"Processing upscale of: {filename}")
+                        upscaled_url = self._upscale_image(input_path)
+                        
+                        response = requests.get(upscaled_url)
+                        with open(output_path, "wb") as f:
+                            f.write(response.content)
+                        print(f"Upscaled image saved in: {output_path}")
 
-                print(f"Imagem upscaled salva em: {output_path}")
+                    except Exception as e:
+                        print(f"Error processing upscale of {filename}: {str(e)}")
 
-            except Exception as e:
-                print(f"Erro ao processar {filename}: {str(e)}")
+        except Exception as e:
+            print(f"Error during upscale processing: {str(e)}")
+
+def main():
+    try:
+        uuid = input("Enter the UUID of the directory to be processed: ")
+        processor = ImageProcessor(uuid)
+        
+        print("\nChoose the operation:")
+        print("1 - Generate images")
+        print("2 - Upscale images")
+        print("3 - Both")
+        choice = input("Enter your choice (1, 2 or 3): ")
+        
+        if choice in ['1', '3']:
+            processor.process_images()
+        if choice in ['2', '3']:
+            processor.process_upscale()
+            
+    except Exception as e:
+        print(f"Error during execution: {str(e)}")
 
 if __name__ == "__main__":
-    # Exemplo de uso
-    uuid = input("Digite o UUID do diretório a ser processado: ")
-    process_images_by_uuid(uuid)
-    # process_upscale_by_uuid(uuid)
+    main()

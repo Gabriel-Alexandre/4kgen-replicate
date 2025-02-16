@@ -27,6 +27,7 @@ class PromptGenerator:
 
     @staticmethod
     def _validate_num_images(num: int) -> int:
+        """Validate the number of images"""
         try:
             num = int(num)
             return max(1, num)
@@ -35,16 +36,19 @@ class PromptGenerator:
 
     @staticmethod
     def _validate_llm_type(llm_type: str) -> str:
+        """Validate the LLM type"""
         if llm_type not in [LLM_TYPES["local"], LLM_TYPES["replicate"]]:
             return LLM_TYPES["local"]
         return llm_type
 
     def _create_output_directory(self) -> str:
+        """Create the output directory"""
         output_dir = os.path.join(PATH_TO_PROMPTS, self.execution_uuid)
         os.makedirs(output_dir, exist_ok=True)
         return output_dir
 
     def _generate_timestamp(self) -> Dict[str, str]:
+        """Generate the timestamp"""
         now = datetime.now()
         return {
             "date": now.strftime("%Y-%m-%d"),
@@ -54,6 +58,7 @@ class PromptGenerator:
         }
 
     def _save_response(self, response: str, iteration: int) -> None:
+        """Save the response"""
         try:
             response_json = json.loads(response)
             final_json = {
@@ -77,6 +82,7 @@ class PromptGenerator:
             raise ValueError(f"Error converting response to JSON: {str(e)}")
 
     def generate_prompts(self) -> None:
+        """Generate the prompts"""
         remaining_images = self.num_images
         iterations = (self.num_images + 1) // 2
         retries = 0
@@ -115,11 +121,13 @@ class PromptGenerator:
                     break
 
     def _generate_completion(self, prompt: str) -> str:
+        """Generate the completion"""
         if self.llm_type == LLM_TYPES["local"]:
             return self._generate_completion_local(prompt)
         return self._generate_completion_replicate(prompt)
 
     def _generate_completion_local(self, prompt: str) -> str:
+        """Generate the completion locally"""
         payload = {
             "messages": [{"role": "user", "content": prompt}],
             **LM_STUDIO_CONFIG
@@ -142,6 +150,7 @@ class PromptGenerator:
             raise ValueError(f"Request error: {str(e)}")
 
     def _generate_completion_replicate(self, prompt: str) -> str:
+        """Generate the completion using Replicate"""
         load_dotenv()
         try:
             output = replicate.run(
